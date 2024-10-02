@@ -52,3 +52,9 @@ http://localhost:3000
 # Supbase 
 Base supabase docker setup
 http://localhost:9000
+
+
+
+# TODO
+
+Simulate a very busy live kichen with dashboard

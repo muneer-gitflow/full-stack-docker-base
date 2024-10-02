@@ -11,9 +11,27 @@ export class Order {
   @Field()
   status: string;
 
-  @Field()
-  createdAt: Date;
+  @Field(() => String, { nullable: true })
+  createdAt?: string;
 
-  @Field({ nullable: true })
-  updatedAt?: Date;
+  @Field(() => String, { nullable: true })
+  updatedAt?: string;
+
+  @Field(() => [OrderItem])
+  items: OrderItem[];
+
+  @Field(() => String, { nullable: true })
+  eta?: string;
+
+  @Field(() => String, { nullable: true })
+  deliveryAddress?: string;
+}
+
+@ObjectType()
+export class OrderItem {
+  @Field()
+  id: string;
+
+  @Field()
+  name: string;
 }

@@ -7,19 +7,17 @@ import { Order } from './order.model';
 
 @Injectable()
 export class OrdersService {
-  constructor(
-    @Inject(SERVICE_NAMES.ORDER) private orderClient: ClientProxy,
-  ) {}
+  constructor(@Inject(SERVICE_NAMES.ORDER) private orderClient: ClientProxy) {}
 
   async getOrders(): Promise<Order[]> {
     return lastValueFrom(
-      this.orderClient.send({ cmd: SERVICE_EVENTS.ORDER.GET_ORDERS }, {})
+      this.orderClient.send({ cmd: SERVICE_EVENTS.ORDER.GET_ORDERS }, {}),
     );
   }
 
   async getOrder(id: string): Promise<Order> {
     return lastValueFrom(
-      this.orderClient.send({ cmd: SERVICE_EVENTS.ORDER.GET_ORDER }, { id })
+      this.orderClient.send({ cmd: SERVICE_EVENTS.ORDER.GET_ORDER }, { id }),
     );
   }
 }

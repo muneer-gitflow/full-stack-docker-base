@@ -1,11 +1,11 @@
-'use client';
+"use client"
 
-import { useState } from 'react';
-import { useQuery, gql } from '@apollo/client';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
+import { useState } from "react"
+import { useQuery, gql } from "@apollo/client"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
 import {
   LineChart,
   Line,
@@ -13,90 +13,103 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
-} from 'recharts';
-import { CheckCircle, XCircle, AlertTriangle, RefreshCw } from 'lucide-react';
+} from "recharts"
+import { CheckCircle, XCircle, AlertTriangle, RefreshCw } from "lucide-react"
 
 const HEALTH_CHECK_QUERY = gql`
   query HealthCheck {
     healthCheck {
       customer
       delivery
+      order
     }
   }
-`;
+`
 
-type ServiceStatus = 'healthy' | 'degraded' | 'unhealthy';
+type ServiceStatus = "healthy" | "degraded" | "unhealthy"
 
 interface HealthCheckData {
   healthCheck: {
-    customer: ServiceStatus;
-    delivery: ServiceStatus;
-  };
+    customer: ServiceStatus
+    delivery: ServiceStatus
+    order: ServiceStatus
+  }
 }
 
 export function ServiceHealthDashboardComponent() {
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(true)
   const { loading, error, data, refetch } = useQuery<HealthCheckData>(
     HEALTH_CHECK_QUERY,
     {
       pollInterval: 30000, // Poll every 30 seconds
-    },
-  );
+    }
+  )
 
   const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
+    setIsDarkMode(!isDarkMode)
     if (isDarkMode) {
-      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.remove("dark")
     } else {
-      document.documentElement.classList.add('dark');
+      document.documentElement.classList.add("dark")
     }
-  };
+  }
 
   const uptimeData = [
-    { name: 'Mon', value: 100 },
-    { name: 'Tue', value: 98 },
-    { name: 'Wed', value: 100 },
-    { name: 'Thu', value: 99 },
-    { name: 'Fri', value: 100 },
-    { name: 'Sat', value: 100 },
-    { name: 'Sun', value: 100 },
-  ];
+    { name: "Mon", value: 100 },
+    { name: "Tue", value: 98 },
+    { name: "Wed", value: 100 },
+    { name: "Thu", value: 99 },
+    { name: "Fri", value: 100 },
+    { name: "Sat", value: 100 },
+    { name: "Sun", value: 100 },
+  ]
 
   const getServiceStatus = (status: ServiceStatus) => {
     switch (status) {
-      case 'healthy':
+      case "healthy":
         return {
-          status: 'Operational',
+          status: "Operational",
           icon: <CheckCircle className="h-5 w-5 text-green-500" />,
-        };
-      case 'degraded':
+        }
+      case "degraded":
         return {
-          status: 'Degraded',
+          status: "Degraded",
           icon: <AlertTriangle className="h-5 w-5 text-yellow-500" />,
-        };
-      case 'unhealthy':
+        }
+      case "unhealthy":
         return {
-          status: 'Down',
+          status: "Down",
           icon: <XCircle className="h-5 w-5 text-red-500" />,
-        };
+        }
     }
-  };
+  }
 
   const services = [
     {
-      name: 'Customer Service',
-      ...getServiceStatus(data?.healthCheck.customer || 'unhealthy'),
-      uptime: '99.95%',
-      responseTime: '120ms',
-      healthResponse: data?.healthCheck.customer || 'unhealthy',
+      name: "Customer Service",
+      ...getServiceStatus(data?.healthCheck.customer || "unhealthy"),
+      uptime: "99.95%",
+      status: "Operational",
+      responseTime: "120ms",
+      healthResponse: data?.healthCheck.customer || "unhealthy",
     },
     {
-      name: 'Delivery Service',
-      ...getServiceStatus(data?.healthCheck.delivery || 'unhealthy'),
-      uptime: '99.5%',
-      responseTime: '350ms',
-      healthResponse: data?.healthCheck.delivery || 'unhealthy',
+      name: "Delivery Service",
+      ...getServiceStatus(data?.healthCheck.delivery || "unhealthy"),
+      status: "Operational",
+      uptime: "99.5%",
+      responseTime: "350ms",
+      healthResponse: data?.healthCheck.delivery || "unhealthy",
     },
+    {
+      name: "Orders Service",
+      ...getServiceStatus(data?.healthCheck.order || "unhealthy"),
+      status: "Operational",
+      uptime: "99.5%",
+      responseTime: "350ms",
+      healthResponse: data?.healthCheck.order || "unhealthy",
+    },
+
     // {
     //   name: 'Gitspark',
     //   status: 'Operational',
@@ -121,39 +134,37 @@ export function ServiceHealthDashboardComponent() {
     //   uptime: '99.99%',
     //   responseTime: '25ms',
     // },
-  ];
+  ]
 
   const incidents = [
     {
-      date: '2023-05-15',
-      service: 'API Gateway',
-      description: 'Intermittent high latency',
-      status: 'Resolved',
+      date: "2023-05-15",
+      service: "API Gateway",
+      description: "Intermittent high latency",
+      status: "Resolved",
     },
     {
-      date: '2023-05-10',
-      service: 'Authentication',
-      description: 'Brief outage during deployment',
-      status: 'Resolved',
+      date: "2023-05-10",
+      service: "Authentication",
+      description: "Brief outage during deployment",
+      status: "Resolved",
     },
     {
-      date: '2023-05-05',
-      service: 'Gitspark',
-      description: 'Scheduled maintenance',
-      status: 'Completed',
+      date: "2023-05-05",
+      service: "Gitspark",
+      description: "Scheduled maintenance",
+      status: "Completed",
     },
-  ];
+  ]
 
   const overallStatus = services.every(
-    (service) => service.status === 'Operational',
+    (service) => service.status === "Operational"
   )
-    ? 'All Systems Operational'
-    : 'Service Disruption';
+    ? "All Systems Operational"
+    : "Service Disruption"
 
   if (loading)
-    return (
-      <p className="text-center py-4 font-mono">Loading health status</p>
-    );
+    return <p className="text-center py-4 font-mono">Loading health status</p>
 
   return (
     <div
@@ -195,12 +206,12 @@ export function ServiceHealthDashboardComponent() {
             <Card className="mb-8 dark:bg-gray-800">
               <CardHeader>
                 <CardTitle className="text-2xl font-bold">
-                  Current Status:{' '}
+                  Current Status:{" "}
                   <span
                     className={
-                      overallStatus === 'All Systems Operational'
-                        ? 'text-green-500'
-                        : 'text-yellow-500'
+                      overallStatus === "All Systems Operational"
+                        ? "text-green-500"
+                        : "text-yellow-500"
                     }
                   >
                     {overallStatus}
@@ -209,9 +220,9 @@ export function ServiceHealthDashboardComponent() {
               </CardHeader>
               <CardContent>
                 <p className="text-lg">
-                  {overallStatus === 'All Systems Operational'
-                    ? 'All services are running normally. There are no known issues at this time.'
-                    : 'We are currently experiencing issues with one or more services. Our team is working on resolving them.'}
+                  {overallStatus === "All Systems Operational"
+                    ? "All services are running normally. There are no known issues at this time."
+                    : "We are currently experiencing issues with one or more services. Our team is working on resolving them."}
                 </p>
               </CardContent>
             </Card>
@@ -266,11 +277,11 @@ export function ServiceHealthDashboardComponent() {
                           <h3 className="font-medium">{service.name}</h3>
                           <p
                             className={`text-sm ${
-                              service.status === 'Operational'
-                                ? 'text-green-500'
-                                : service.status === 'Degraded'
-                                  ? 'text-yellow-500'
-                                  : 'text-red-500'
+                              service.status === "Operational"
+                                ? "text-green-500"
+                                : service.status === "Degraded"
+                                ? "text-yellow-500"
+                                : "text-red-500"
                             }`}
                           >
                             {service.status}
@@ -309,9 +320,9 @@ export function ServiceHealthDashboardComponent() {
                         </div>
                         <span
                           className={`px-2 py-1 text-xs font-medium rounded-full ${
-                            incident.status === 'Resolved'
-                              ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100'
-                              : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100'
+                            incident.status === "Resolved"
+                              ? "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100"
+                              : "bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100"
                           }`}
                         >
                           {incident.status}
@@ -348,7 +359,7 @@ export function ServiceHealthDashboardComponent() {
                   <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
                     <div
                       className="bg-green-600 h-2.5 rounded-full"
-                      style={{ width: '99.99%' }}
+                      style={{ width: "99.99%" }}
                     ></div>
                   </div>
                 </div>
@@ -358,5 +369,5 @@ export function ServiceHealthDashboardComponent() {
         )}
       </div>
     </div>
-  );
+  )
 }
