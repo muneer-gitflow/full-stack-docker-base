@@ -491,11 +491,16 @@ services:
       - ../backend/apps/orders:/usr/src/app/apps/orders
       - ../backend/libs:/usr/src/app/libs
       - /usr/src/app/node_modules
+    command: npx pnpm run start:dev orders
     environment:
       - NODE_ENV=development
+      - SUPABASE_URL=http://kong:8000
+      - SUPABASE_ANON_KEY=${ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SERVICE_ROLE_KEY}
     depends_on:
       - rabbitmq
       - redis
+      - kong  # Add this to ensure Supabase is ready
 
   simtools:
     build:

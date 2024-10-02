@@ -1,7 +1,7 @@
 import { SharedModule, SharedService } from '@app/shared';
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ClientsModule, Transport } from '@nestjs/microservices';
+import { ConfigModule } from '@nestjs/config';
+
 import { CustomerController } from './customer.controller';
 import { CustomerService } from './customer.service';
 import { SERVICE_NAMES } from 'libs/shared/service.names';

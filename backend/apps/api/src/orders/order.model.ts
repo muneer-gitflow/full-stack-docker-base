@@ -6,7 +6,7 @@ export class Order {
   id: string;
 
   @Field()
-  customerId: string;
+  customer_id: string;
 
   @Field()
   status: string;
@@ -18,7 +18,7 @@ export class Order {
   updatedAt?: string;
 
   @Field(() => [OrderItem])
-  items: OrderItem[];
+  order_items: OrderItem[];
 
   @Field(() => String, { nullable: true })
   eta?: string;

@@ -1,11 +1,10 @@
 import { DynamicModule, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClientProxyFactory, Transport } from '@nestjs/microservices';
-import { SharedConfigService } from '../config/shared-config.service';
+import { createClient } from '@supabase/supabase-js';
 
 @Module({
-  imports: [ConfigModule],
-  providers: [SharedConfigService],
+  imports: [ConfigModule.forRoot()],
 })
 export class SharedModule {
   static registerRmq(service: string, queue: string): DynamicModule {
@@ -36,6 +35,24 @@ export class SharedModule {
       module: SharedModule,
       providers,
       exports: providers,
+    };
+  }
+
+  static registerSupabase(providerName: string): DynamicModule {
+    return {
+      module: SharedModule,
+      providers: [
+        {
+          provide: providerName,
+          useFactory: (configService: ConfigService) => {
+            const supabaseUrl = configService.get<string>('SUPABASE_URL');
+            const supabaseKey = configService.get<string>('SUPABASE_KEY');
+            return createClient(supabaseUrl, supabaseKey);
+          },
+          inject: [ConfigService],
+        },
+      ],
+      exports: [providerName],
     };
   }
 }

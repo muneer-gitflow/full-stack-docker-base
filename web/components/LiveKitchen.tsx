@@ -42,9 +42,15 @@ import {
   SettingsIcon,
 } from "lucide-react"
 import { useQuery, gql } from "@apollo/client"
+import { formatDistanceToNow, parseISO } from "date-fns"
 
 // Define types
-type OrderStatus = "PENDING" | "PREPARING" | "COOKING" | "READY" | "DELIVERED"
+type OrderStatus =
+  | "PROCESSING"
+  | "SHIPPED"
+  | "COMPLETED"
+  | "PENDING"
+  | "CANCELLED"
 
 interface OrderItem {
   id: string
@@ -54,11 +60,11 @@ interface OrderItem {
 interface Order {
   id: string
   status: OrderStatus
-  customerId: string
+  customer_id: string
   createdAt: string
   updatedAt: string
   eta: string
-  items: OrderItem[]
+  order_items: OrderItem[]
 }
 
 interface OrdersData {
@@ -69,18 +75,33 @@ const ORDERS_QUERY = gql`
   query GetOrders {
     orders {
       id
-      status
-      customerId
+      customer_id
       createdAt
       updatedAt
       eta
-      items {
+      status
+      order_items {
         id
         name
       }
     }
   }
 `
+
+// Add this helper function before the LiveKitchen component
+function formatETA(eta: string): string {
+  try {
+    const etaDate = parseISO(eta)
+    const now = new Date()
+    if (etaDate < now) {
+      return "Overdue"
+    }
+    return formatDistanceToNow(etaDate, { addSuffix: true })
+  } catch (error) {
+    console.error("Error parsing ETA:", error)
+    return "Invalid ETA"
+  }
+}
 
 export function LiveKitchen() {
   const [isDarkMode, setIsDarkMode] = useState(false)
@@ -180,8 +201,10 @@ export function LiveKitchen() {
     return orders.filter(
       (order) =>
         (order.id.toLowerCase().includes(orderSearch.toLowerCase()) ||
-          order.customerId.toLowerCase().includes(orderSearch.toLowerCase()) ||
-          order.items.some((item) =>
+          order?.customer_id
+            ?.toLowerCase()
+            .includes(orderSearch.toLowerCase()) ||
+          order?.order_items?.some((item) =>
             item.name.toLowerCase().includes(orderSearch.toLowerCase())
           )) &&
         (orderStatusFilter === "all" || order.status === orderStatusFilter)
@@ -203,6 +226,16 @@ export function LiveKitchen() {
           delivery.status === deliveryStatusFilter)
     )
   }, [deliveryQueue, deliverySearch, deliveryStatusFilter])
+
+  const totalOrders = orders.length;
+  const previousTotalOrders = useMemo(() => {
+    // This is a placeholder. In a real scenario, you'd compare with historical data
+    return totalOrders - Math.floor(Math.random() * 10); // Simulating a difference
+  }, [totalOrders]);
+
+  const orderPercentageChange = previousTotalOrders 
+    ? ((totalOrders - previousTotalOrders) / previousTotalOrders) * 100 
+    : 0;
 
   return (
     <div
@@ -304,8 +337,11 @@ export function LiveKitchen() {
                 <ClipboardListIcon className="h-5 w-5 text-blue-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-gray-900">247</div>
-                <p className="text-xs text-gray-500">+23% from last hour</p>
+                <div className="text-2xl font-bold text-gray-900">{totalOrders}</div>
+                <p className="text-xs text-gray-500">
+                  {orderPercentageChange > 0 ? '+' : ''}
+                  {orderPercentageChange.toFixed(1)}% from last hour
+                </p>
               </CardContent>
             </Card>
             <Card className="bg-white shadow-sm hover:shadow-md transition-shadow duration-300">
@@ -471,22 +507,26 @@ export function LiveKitchen() {
                             {order.id}
                           </td>
                           <td className="p-2 text-sm text-gray-900">
-                            {order.customerId}
+                            {order.customer_id}
                           </td>
                           <td className="p-2 text-sm text-gray-900">
-                            {order.items.map((item) => item.name).join(", ")}
+                            {order.order_items
+                              .map((item) => item.name)
+                              .join(", ")}
                           </td>
                           <td className="p-2">
                             <span
                               className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                order.status === "PREPARING"
+                                order.status === "PROCESSING"
                                   ? "bg-yellow-100 text-yellow-800"
                                   : order.status === "PENDING"
                                   ? "bg-blue-100 text-blue-800"
-                                  : order.status === "COOKING"
+                                  : order.status === "SHIPPED"
                                   ? "bg-orange-100 text-orange-800"
-                                  : order.status === "DELIVERED"
+                                  : order.status === "COMPLETED"
                                   ? "bg-green-100 text-green-800"
+                                  : order.status === "CANCELLED"
+                                  ? "bg-red-100 text-red-800"
                                   : "bg-gray-100 text-gray-800"
                               }`}
                             >
@@ -494,7 +534,7 @@ export function LiveKitchen() {
                             </span>
                           </td>
                           <td className="p-2 text-sm text-gray-900">
-                            {order.eta}
+                            {formatETA(order.eta)}
                           </td>
                         </tr>
                       ))}

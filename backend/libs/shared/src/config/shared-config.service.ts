@@ -21,7 +21,9 @@ export class SharedConfigService {
 
   getKafkaConfig() {
     return {
-      brokers: this.get<string>('KAFKA_BROKERS')?.split(',') || ['localhost:9092'],
+      brokers: this.get<string>('KAFKA_BROKERS')?.split(',') || [
+        'localhost:9092',
+      ],
     };
   }
 }
